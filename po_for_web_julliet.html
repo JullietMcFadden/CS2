@@ -1,0 +1,191 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Office</title>
+</head>
+<body>
+    <h1>Enter your package dimension</h1>
+    <form id="boxForm">
+        <label for="height">Height:</label>
+        <input type="number" id="height" name="height" step="0.01"><br><br>
+        
+        <label for="length">Length:</label>
+        <input type="number" id="length" name="length" step="0.01"><br><br>
+        
+        <label for="thickness">Thickness:</label>
+        <input type="number" id="thickness" name="thickness" step="0.01"><br><br>
+        
+        <label for="zipFrom">Zip From:</label>
+        <input type="number" id="startzip" name="startzip" step="1"><br><br>
+        
+        <label for="zipTo">Zip To:</label>
+        <input type="number" id="endzip" name="endzip" step="1"><br><br>
+        
+        <button type="button" onclick="main()">Submit</button>
+    </form>
+
+    <script>
+        /**
+         * Main function to read in the data from the form
+         */
+
+    function get_post_type(length,height,thickness)
+    {
+    /*
+    figures out the type of postage
+    Args:
+        length (float): length of package
+        height (float): height of package
+        thickness (float): thickeness of package
+    Returns:
+        returns: str of type of postage 
+    */                         
+    if (length>=3.5 && length<=4.25 && height>=3.5 && height<=6 && thickness>=0.007 && thickness<=0.016)
+        return "postcard";
+    else if (length>4.25 && length<6 && height>6 && height<11 && thickness>=0.007 && thickness<=0.015)
+        return "large postcard";
+    else if (length>=3.5 && length<=6.125 && height>=5 && height<=11 && thickness>0.016 && thickness<0.25)
+        return "envelope";
+    else if (length>6.125 && length<24 && height>=11 && height<=18 && thickness>=0.25 && thickness<=0.5)
+        return "large envelope";
+    else if (length>24 || height>18 || thickness>0.5 && length + 2*(height + thickness)<=84)
+        return "package";
+    else if (length>24 || height>18 || thickness>0.5 && 84 < (length + 2*(height + thickness)) <= 130)
+        return "large package";
+    else
+        return "unmailable";
+    }
+
+    function get_zones(zip)
+    {
+    /*
+    Figures out the zone from the zip
+    Args:
+        zip (str): zipcode
+    Returns:
+        returns: int of the zone
+    */                
+    if (zip>=1 && zip<=6999)
+        return 1;
+    else if (zip>=7000 && zip<=19999)
+        return 2;
+    else if (zip>=20000 && zip<=35999)
+        return 3;
+    else if (zip>=36000 && zip<=62999)
+        return 4;
+    else if (zip>=63000 && zip<=84999)
+        return 5;
+    else if (zip>=85000 && zip<=99999)
+        return 6;
+    else
+        return -1;
+    }    
+
+    function get_distance(startzone, endzone)
+    {
+        /*
+        Determines distance in zones
+        Args:
+            startzone (int): starting zone for package
+            endzone (int): starting zone for package
+        Returns:
+            return: distance between zones 
+        */                         
+        if (startzone == -1 || endzone == -1)                                                                                //if each of zip codes = -1 (meaning invalid so unmailible)
+            return -1;                                                                                                       //return -1 to signify unmailable for later
+        return Math.abs(endzone - startzone);                                                                                      //return absolute value of end-start
+    }
+
+    function calc_cost(post_type,distance)
+    {
+        /*
+        calculates cost to mail the package
+        Args:
+            post_type (str): type of package
+            distance (int): distance between zones
+        Returns:
+            return: final cost of package
+        */                         
+    if (post_type == "unmailable" || distance == -1)                                                                     //if unmailible or distnace = -1(meaning zipcode was invalid so unmailible)
+        return "unmailable";
+    else if (post_type == "postcard")
+        return 0.20 + distance*0.03;
+    else if (post_type == "large postcard")
+        return 0.37 + distance*0.03;
+    else if (post_type == "envelope")
+        return 0.37 + distance*0.04;
+    else if (post_type == "large envelope")
+        return 0.60 + distance*0.05;
+    else if (post_type == "package")
+        return 2.95 + distance*0.25;
+    else if (post_type == "large package")
+        return 3.95 + distance*0.35;
+    }
+/*
+    function main()
+    {
+    length,height,thickness,startzip,endzip = get_data()                                                                //set the 5 values returned in the list into the values within the list in that order
+    post_type = get_post_type(length, height, thickness)
+    startzone = get_zones(startzip)
+    endzone = get_zones(endzip)
+    distance = get_distance(startzone,endzone)
+    final_cost = calc_cost(post_type,distance)
+
+    if (final_cost == 'unmailable')                                                                                      
+        print('unmailable');
+    else
+        final_cost = f;'{final_cost:.2f}';                                                                                //format number so it will go to 2 decimal places
+
+        if (final_cost.startswith("0."))                                                                                 //if number starts with 0.
+            print(final_cost[1:]);                                                                                       //excludes first in sequence
+        else
+            print(final_cost);
+    }
+*/
+
+        function main() {
+            // Read in the data from the form
+            const height = parseFloat(document.getElementById('height').value);
+            const length = parseFloat(document.getElementById('length').value);
+            const thickness = parseFloat(document.getElementById('thickness').value);
+            const startzip = parseInt(document.getElementById('startzip').value);
+            const endzip = parseInt(document.getElementById('endzip').value);
+            
+            post_type = get_post_type(length, height, thickness);
+            
+            startzone = get_zones(startzip);
+            
+            endzone = get_zones(endzip);
+            distance = get_distance(startzone,endzone);
+            final_cost = calc_cost(post_type,distance);
+            
+            final_cost = final_cost.toFixed(2);
+
+            
+            console.log(final_cost);
+            alert('Your cost to ship your package is $' + final_cost);
+        }
+
+        /**
+         * Function to get zip information
+         * @param {number} zip - The zip code
+         */
+        function getZone(zip) {
+            // Implementation goes here
+        }
+
+        /**
+         * Function to calculate distance based on dimensions
+         * @param {number} length - The length of the box
+         * @param {number} height - The height of the box
+         * @param {number} thickness - The thickness of the box
+         */
+        function getDistance(length, height, thickness) {
+            // Implementation goes here
+        }
+    </script>
+</body>
+</html>
